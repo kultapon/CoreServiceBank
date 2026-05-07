@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -17,3 +16,14 @@ class DBSettings(BaseSettings):
     )
 
 db_settings = DBSettings()
+
+class JWTSettings(BaseSettings):
+    PRIVATE_KEY: str
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    model_config = SettingsConfigDict(env_file=ENV, extra="ignore",)
+
+
+jwt_settings = JWTSettings()
