@@ -13,8 +13,8 @@ from pydantic import (
 
 
 class UserLogin(BaseModel):
-    username: str | None = Field(
-        None,
+    username: str = Field(
+        ...,
         pattern="^[a-zA-Z0-9_-]+$",
         title="Username",
         examples=["my_username"],
@@ -22,13 +22,6 @@ class UserLogin(BaseModel):
         max_length=50,
     )
     password: str = Field(..., min_length=8, max_length=64)
-
-    @model_validator(mode="after")
-    def normalize_and_validate(self):
-        if not self.username:
-            raise ValueError("Username is required")
-        return self
-
 
 class UserCreate(BaseModel):
     username: str = Field(

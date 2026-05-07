@@ -5,29 +5,13 @@ from fastapi import (
     Form,
     status,
 )
-from fastapi.requests import Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
+
+from src.services.auth_service import authenticate
+from src.services.jwt_service import (create_access_token, create_refresh_token)
 from src.api.routers import auth_router
 from src.database import SessionDep
 from src.schemas.user import UserCreate, UserLogin, UserRead
-from src.services.auth_service.service import (
-    authenticate,
-    change_password,
-    check_user_email,
-    register_user,
-    verify_user,
-)
-from src.services.jwt_service.service import (
-    create_access_token,
-    create_email_confirm_token,
-    create_refresh_token,
-    create_reset_token,
-)
-
-templates = Jinja2Templates(directory="src/templates")
-
 
 @auth_router.post(
     "/login",
@@ -54,9 +38,5 @@ async def signup(
     background_tasks: BackgroundTasks,
 ):
     created_user = await register_user(usr_params, session)
-    email_token = create_email_confirm_token(created_user.id)
-    background_tasks.add_task(
-        send_email, created_user.email, "Email Confirmation", email_token
-    )
 
     return created_user
