@@ -31,7 +31,7 @@ def register_exception_handlers(app):
     async def validation_exception_handler_response(
         _: Request, exc: ResponseValidationError
     ):
-        logger.warning(f"ResponseValError: {exc.errors()}")
+        logger.warning("ResponseValError")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": exc.errors()},

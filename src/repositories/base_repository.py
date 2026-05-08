@@ -25,7 +25,7 @@ class BaseRepository(Generic[T]):
                     "Unique constraint violated!"
                 ) from e
             else:
-                raise DatabaseError(f"Database integrity error: {msg}") from e
+                raise DatabaseError(f"Database integrity error") from e
         except SQLAlchemyError as e:
             await self.session.rollback()
             raise DatabaseError("Database integrity error") from e
