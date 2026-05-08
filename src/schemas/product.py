@@ -1,3 +1,6 @@
+from datetime import datetime
+from decimal import Decimal
+
 from pydantic import (
     BaseModel,
     Field, ConfigDict,
@@ -13,3 +16,24 @@ class ProductFilter(BaseModel):
         default="desc",
         pattern="^(asc|desc)$",
     )
+
+
+class ProductBase(BaseModel):
+    id: int
+    name: str
+    description: str | None
+    price_rub: Decimal
+    common_note: str | None
+    category_id: int
+    creator_id: int
+    created_at: datetime
+    updated_at: datetime
+    special_note: str | None = None
+
+
+class ProductUserRead(ProductBase):
+    pass
+
+
+class ProductAdvancedRead(ProductBase):
+    special_note: str | None
