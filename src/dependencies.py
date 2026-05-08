@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status, Header
-afrom sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repositories.repositories import UserRepository
 from src.services.jwt_service import decode_token

@@ -1,23 +1,22 @@
-from fastapi import APIRouter, Depends
+from fastapi import Depends
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from src.dependencies import get_current_user, require_roles
+from src.dependencies import require_roles
 from src.database import get_session
 from src.models import User
 from src.api.routers import products_router
-from src.schemas.product import ProductFilter, ProductBase
+from src.schemas.product import ProductFilter, ProductRead, ProductCreate, ProductReadPag
 from src.schemas.roles import RoleEnum
-from src.services.products_service import build_products_query
-
+from src.services.products_service import build_products_query, create_product
 
 SessionDep = Depends(get_session)
 
 
 @products_router.get(
-    "", response_model=Page[ProductBase]
+    "", response_model=Page[ProductReadPag]
 )
 async def get_products(
     session: AsyncSession = SessionDep,
@@ -34,3 +33,23 @@ async def get_products(
         query,
         params,
     )
+
+@products_router.post(
+    "",
+    response_model=ProductRead,
+    status_code=status.HTTP_201_CREATED,
+)
+async def made_product(
+    product_data: ProductCreate,
+    session: AsyncSession = SessionDep,
+    current_user: User = Depends(
+    require_roles(
+            RoleEnum.USER,
+            RoleEnum.MODERATOR,
+        )
+    ),
+):
+
+    product = await create_product(product_data, current_user, session)
+
+    return product

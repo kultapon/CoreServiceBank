@@ -2,7 +2,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload, joinedload
 
-from src.models import Role, User
+from src.models import Role, User, Category, Product
 from src.repositories.base_repository import BaseRepository
 
 
@@ -36,6 +36,19 @@ class UserRepository(BaseRepository[User]):
 
         return await self.session.scalar(query)
 
+class ProductRepository(BaseRepository[Product]):
+
+    async def exists(self, name: str) -> bool:
+        query = select(User.id).where(Product.name == name)
+        result = await self.session.scalar(query)
+        return result is not None
+
+    async def get_product_by_id(self, product_id: int) -> Product | None:
+
+        return await self.session.scalar(
+            select(Product)
+            .where(Product.id == product_id))
+
 class RoleRepository(BaseRepository[Role]):
 
     async def get_role_by_id(self, role_id: int) -> Role | None:
@@ -50,3 +63,13 @@ class RoleRepository(BaseRepository[Role]):
         return await self.session.scalar(
             select(Role).where(Role.name == name)
         )
+
+class CategoryRepository(BaseRepository[Category]):
+
+    async def get_category_by_id(
+        self,
+        category_id: int,
+    ) -> Category | None:
+
+        return await self.session.scalar(select(Category).where(
+            Category.id == category_id))
