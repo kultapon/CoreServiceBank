@@ -47,7 +47,7 @@ def decode_token(token: str, expected_type:str) -> dict:
 
     try:
         payload = jwt.decode(
-            token, jwt_settings.public_key, algorithms=jwt_settings.ALGORITHM
+            token, jwt_settings.JWT_SECRET_KEY, algorithms=jwt_settings.JWT_ALGORITHM
         )
 
         if payload["type"] != expected_type:

@@ -27,13 +27,4 @@ class ProductBase(BaseModel):
     category_id: int
     creator_id: int
     created_at: datetime
-    updated_at: datetime
     special_note: str | None = None
-
-
-class ProductUserRead(ProductBase):
-    pass
-
-
-class ProductAdvancedRead(ProductBase):
-    special_note: str | None

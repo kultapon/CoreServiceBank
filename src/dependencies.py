@@ -1,12 +1,12 @@
 from fastapi import Depends, HTTPException, status, Header
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+afrom sqlalchemy.ext.asyncio import AsyncSession
 
+from src.repositories.repositories import UserRepository
 from src.services.jwt_service import decode_token
 from src.database import get_session
 from src.models import User
 from src.schemas.roles import RoleEnum
-from src.core.errors.errors import TokenError
+from src.core.errors.errors import TokenError, AppError, ForbiddenError
 
 SessionDep = Depends(get_session)
 
@@ -34,27 +34,15 @@ async def get_current_user(
 ) -> User:
     user_id = token_payload.get("sub")
 
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-        )
+    if user_id is None:
+        raise TokenError("Token Error")
 
-    query = (
-        select(User)
-        .where(User.id == int(user_id))
-        .where(User.banned_at.is_(None))
-    )
+    usr_rep = UserRepository(session)
 
-    result = await session.execute(query)
-
-    user = result.scalar_one_or_none()
+    user = await usr_rep.get_active_user_with_role(int(user_id))
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
+        raise AppError("User not found")
 
     return user
 
@@ -64,13 +52,8 @@ def require_roles(*allowed_roles: RoleEnum):
         current_user: User = Depends(get_current_user),
     ) -> User:
 
-        user_role = current_user.role.name
-
-        if user_role not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions",
-            )
+        if current_user.role.name not in allowed_roles:
+            raise ForbiddenError("Insufficient permissions")
 
         return current_user
 
