@@ -4,7 +4,7 @@ from src.api.auth import auth_router
 from src.core.errors.handlers import register_exception_handlers
 from src.core.logger import setup_logging
 from src.core.middleware import logging_middleware
-from src.core.setnry import setup_sentry
+from src.core.sentry import setup_sentry
 
 app = FastAPI(title="CoreService")
 

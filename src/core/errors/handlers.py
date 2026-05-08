@@ -1,5 +1,4 @@
-import logging
-
+import structlog
 from fastapi import Request, status
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
@@ -7,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.core.errors.errors import AppError
 
-logger = logging.getLogger(__name__)
+logger = structlog.getLogger(__name__)
 
 
 def register_exception_handlers(app):

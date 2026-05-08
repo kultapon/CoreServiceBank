@@ -40,10 +40,8 @@ async def signup(
     session: SessionDep
 ):
     created_user = await register_user(usr_params, session)
-
+    logger.info(
+        event="user_registered",
+        user_id=created_user.id,
+    )
     return created_user
-
-@auth_router.get("/logtest")
-async def logtest():
-
-    return 1/0
