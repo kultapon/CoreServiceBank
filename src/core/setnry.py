@@ -1,4 +1,5 @@
 import sentry_sdk
+import structlog
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
@@ -6,7 +7,10 @@ from src.schemas.config import log_settings
 
 def before_send(event, hint):
     request = event.get("request")
-
+    context = structlog.contextvars.get_contextvars()
+    event.setdefault("extra", {})
+    event["extra"]["request_id"] = context.get("request_id")
+    
     if request and "headers" in request:
         request["headers"].pop("authorization", None)
 
