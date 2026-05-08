@@ -28,3 +28,12 @@ class JWTSettings(BaseSettings):
 
 
 jwt_settings = JWTSettings()
+
+class LoggingSettings(BaseSettings):
+    SENTRY_DSN: str | None = None
+    ENVIRONMENT: str = "development"
+    SENTRY_TRACES_SAMPLE_RATE: float = 1.0
+    model_config = SettingsConfigDict(env_file=ENV, extra="ignore", )
+
+
+log_settings = LoggingSettings()
