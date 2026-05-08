@@ -17,6 +17,7 @@ psycopg2-binary = "^2.9.12"
 pwdlib = "^0.3.0"
 argon2-cffi = "^25.1.0"
 pyjwt = "^2.12.1"
+structlog = "^25.5.0"
 
 
 [build-system]

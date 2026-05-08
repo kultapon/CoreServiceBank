@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 from src.api.auth import auth_router
-from src.errors.handlers import register_exception_handlers
+from src.core.errors.handlers import register_exception_handlers
 
 app = FastAPI(title="CoreService")
 
