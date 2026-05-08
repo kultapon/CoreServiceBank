@@ -5,7 +5,7 @@ import structlog
 
 
 def setup_logging() -> None:
-    
+
     timestamper = structlog.processors.TimeStamper(
         fmt="iso",
         utc=True,
@@ -26,6 +26,7 @@ def setup_logging() -> None:
             structlog.processors.JSONRenderer(),
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
 
