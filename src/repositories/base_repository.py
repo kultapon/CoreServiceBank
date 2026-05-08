@@ -4,7 +4,7 @@ from sqlalchemy import Select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.errors.errors import DatabaseError, UniqueConstraintError
+from src.core.errors.errors import DatabaseError, UniqueConstraintError
 
 T = TypeVar("T")
 

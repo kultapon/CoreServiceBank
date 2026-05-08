@@ -11,7 +11,6 @@ class UserRepository(BaseRepository[User]):
     async def exists(self, username: str) -> bool:
         query = select(User.id).where(User.username == username)
         result = await self.session.scalar(query)
-
         return result is not None
 
     async def get_user_by_username(self, username: str) -> User | None:
