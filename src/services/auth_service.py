@@ -1,7 +1,7 @@
 from pwdlib import PasswordHash
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.errors.errors import AppError, UniqueConstraintError
+from src.core.errors.errors import AppError, UniqueConstraintError
 from src.schemas.config import db_settings
 from src.models import User
 from src.repositories.repositories import UserRepository, RoleRepository

@@ -5,7 +5,7 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
-from src.errors.errors import AppError
+from src.core.errors.errors import AppError
 
 logger = logging.getLogger(__name__)
 
