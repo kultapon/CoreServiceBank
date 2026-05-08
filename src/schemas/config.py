@@ -8,8 +8,9 @@ ENV = PROJECT_ROOT / ".env"
 
 class DBSettings(BaseSettings):
     DATABASE_URL: str
-    ADMIN_USERNAME: str = "admin_main"
-    ADMIN_PASSWORD: str = "change_me123"
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+    DEFAULT_REGISTER_ROLE: str = "user"
     model_config = SettingsConfigDict(
         env_file=ENV,
         extra="ignore",

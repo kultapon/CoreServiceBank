@@ -46,6 +46,13 @@ def register_exception_handlers(app):
             content={"detail": "Database integrity error"},
         )
 
+    @app.exception_handler(TypeError)
+    async def unhandled_exception_handler(_: Request, exc: TypeError):
+        logger.exception(f"Unhandled error: {exc}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Internal server error"},
+        )
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(_: Request, exc: Exception):
         logger.exception(f"Unhandled error: {exc}")
