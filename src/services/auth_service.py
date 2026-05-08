@@ -1,13 +1,16 @@
+import structlog
 from pwdlib import PasswordHash
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.errors.errors import AppError, UniqueConstraintError
+from src.core.errors.errors import AppError, UniqueConstraintError
 from src.schemas.config import db_settings
 from src.models import User
 from src.repositories.repositories import UserRepository, RoleRepository
 from src.schemas.user import UserAuth
+logger = structlog.get_logger(__name__)
 
 pwd_hasher = PasswordHash.recommended()
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_hasher.verify(plain_password, hashed_password)

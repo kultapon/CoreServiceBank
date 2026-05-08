@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 
 from src.schemas.config import jwt_settings
-from src.errors.errors import TokenError
+from src.core.errors.errors import TokenError
 
 
 def create_token(
