@@ -49,6 +49,12 @@ class ProductRepository(BaseRepository[Product]):
             select(Product)
             .where(Product.id == product_id))
 
+    async def get_product_by_name(self, product_name: str) -> Product | None:
+
+        return await self.session.scalar(
+            select(Product)
+            .where(Product.name == product_name))
+
 class RoleRepository(BaseRepository[Role]):
 
     async def get_role_by_id(self, role_id: int) -> Role | None:
