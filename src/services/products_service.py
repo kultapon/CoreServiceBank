@@ -127,32 +127,44 @@ async def update_product(
     if not is_owner and not is_moderator:
         raise AppError("You cannot edit this product")
 
-    category = await category_rep.get_category_by_id(
-        product_data.category_id
+    update_data = product_data.model_dump(
+        exclude_unset=True
     )
 
-    if not category:
-        raise AppError("Category not found")
+    if "category_id" in update_data:
 
-
-    existing_product = await product_rep.get_product_by_name(
-        product_data.name
-    )
-
-    if existing_product and existing_product.id != product.id:
-        raise AppError(
-            "Product with this name already exists"
+        category = await category_rep.get_category_by_id(
+            update_data["category_id"]
         )
 
-    product.name = product_data.name
-    product.description = product_data.description
-    product.price_rub = product_data.price_rub
-    product.common_note = product_data.common_note
-    product.category_id = product_data.category_id
+        if not category:
+            raise AppError("Category not found")
 
-    if current_user.role.name == RoleEnum.MODERATOR:
-        product.special_note = product_data.special_note
 
+    if "name" in update_data:
+
+        existing_product = await product_rep.get_product_by_name(
+            update_data["name"]
+        )
+
+        if (
+            existing_product
+            and existing_product.id != product.id
+        ):
+            raise AppError(
+                "Product with this name already exists"
+            )
+
+
+    for field, value in update_data.items():
+
+        if (
+            field == "special_note"
+            and current_user.role.name != RoleEnum.MODERATOR
+        ):
+            continue
+
+        setattr(product, field, value)
 
     await product_rep.save(product)
 
