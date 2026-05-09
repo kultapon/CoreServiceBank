@@ -79,3 +79,11 @@ class ProductCreate(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+
+class ProductUpdate(BaseModel):
+    name: str
+    description: str | None = None
+    price_rub: Decimal
+    common_note: str | None = None
+    special_note: str | None = None
+    category_id: int

@@ -6,7 +6,7 @@ from src.core.errors.errors import AppError, ForbiddenError, UniqueConstraintErr
 from src.repositories.repositories import CategoryRepository, ProductRepository
 from src.schemas.roles import RoleEnum
 from src.models import Product, User
-from src.schemas.product import ProductFilter, ProductCreate
+from src.schemas.product import ProductFilter, ProductCreate, ProductUpdate
 
 PRODUCT_SORT_FIELDS = {
     "created_at": Product.created_at,
@@ -102,5 +102,58 @@ async def create_product(
         else:
             raise AppError(msg)
 
+
+    return product
+
+
+async def update_product(
+    product_id: int,
+    product_data: ProductUpdate,
+    current_user: User,
+    session: AsyncSession,
+) -> Product:
+
+    product_rep = ProductRepository(session)
+    category_rep = CategoryRepository(session)
+
+    product = await product_rep.get_product_by_id(product_id)
+
+    if not product:
+        raise AppError("Product not found")
+
+    is_owner = product.creator_id == current_user.id
+    is_moderator = current_user.role.name == RoleEnum.MODERATOR
+
+    if not is_owner and not is_moderator:
+        raise AppError("You cannot edit this product")
+
+    category = await category_rep.get_category_by_id(
+        product_data.category_id
+    )
+
+    if not category:
+        raise AppError("Category not found")
+
+
+    existing_product = await product_rep.get_product_by_name(
+        product_data.name
+    )
+
+    if existing_product and existing_product.id != product.id:
+        raise AppError(
+            "Product with this name already exists"
+        )
+
+    product.name = product_data.name
+    product.description = product_data.description
+    product.price_rub = product_data.price_rub
+    product.common_note = product_data.common_note
+    product.category_id = product_data.category_id
+
+    if current_user.role.name == RoleEnum.MODERATOR:
+        product.special_note = product_data.special_note
+
+
+    await product_rep.save(product)
 
     return product
