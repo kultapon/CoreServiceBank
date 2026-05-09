@@ -81,9 +81,20 @@ class ProductCreate(BaseModel):
     )
 
 class ProductUpdate(BaseModel):
-    name: str
+    name: str | None = None
     description: str | None = None
-    price_rub: Decimal
+
+    price_rub: Decimal | None = Field(
+        default=None,
+        gt=0,
+        max_digits=12,
+        decimal_places=2,
+    )
+
     common_note: str | None = None
     special_note: str | None = None
-    category_id: int
+    category_id: int | None = None
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
