@@ -3,7 +3,6 @@ from fastapi import (
     status,
 )
 
-
 from src.services.auth_service import authenticate, register_user
 from src.services.jwt_service import (create_access_token, create_refresh_token)
 from src.api.routers import auth_router

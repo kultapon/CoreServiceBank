@@ -1,18 +1,28 @@
 from sqlalchemy import asc, desc, select, literal
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, defer, with_expression
+from sqlalchemy.orm import joinedload, with_expression
 
 from src.core.errors.errors import AppError, ForbiddenError, UniqueConstraintError
 from src.repositories.repositories import CategoryRepository, ProductRepository
 from src.schemas.roles import RoleEnum
 from src.models import Product, User
-from src.schemas.product import ProductFilter, ProductCreate, ProductUpdate
+from src.schemas.product import ProductFilter, ProductCreate, ProductUpdate, ProductReadModerator, ProductReadUser
 
 PRODUCT_SORT_FIELDS = {
     "created_at": Product.created_at,
     "price_rub": Product.price_rub,
     "name": Product.name,
 }
+
+def build_product_response(
+    product: Product,
+    current_user: User,
+):
+
+    if current_user.role.name == RoleEnum.MODERATOR:
+        return ProductReadModerator.model_validate(product)
+
+    return ProductReadUser.model_validate(product)
 
 def build_products_query(
     filters: ProductFilter,
