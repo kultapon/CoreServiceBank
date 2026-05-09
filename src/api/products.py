@@ -5,21 +5,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from src.dependencies import require_roles
-from src.database import get_session
+from src.database import SessionDep
 from src.models import User
 from src.api.routers import products_router
-from src.schemas.product import ProductFilter, ProductRead, ProductCreate, ProductReadPag
+from src.schemas.product import ProductFilter, ProductCreate, ProductReadPag, ProductUpdate
 from src.schemas.roles import RoleEnum
-from src.services.products_service import build_products_query, create_product
-
-SessionDep = Depends(get_session)
+from src.services.products_service import build_products_query, create_product, update_product, build_product_response
 
 
 @products_router.get(
     "", response_model=Page[ProductReadPag]
 )
 async def get_products(
-    session: AsyncSession = SessionDep,
+    session: SessionDep,
     filters: ProductFilter = Depends(),
     params: Params = Depends(),
     current_user: User = Depends(require_roles(RoleEnum.USER,RoleEnum.MODERATOR))
@@ -36,12 +34,11 @@ async def get_products(
 
 @products_router.post(
     "",
-    response_model=ProductRead,
     status_code=status.HTTP_201_CREATED,
 )
 async def made_product(
     product_data: ProductCreate,
-    session: AsyncSession = SessionDep,
+    session: SessionDep,
     current_user: User = Depends(
     require_roles(
             RoleEnum.USER,
@@ -50,6 +47,40 @@ async def made_product(
     ),
 ):
 
-    product = await create_product(product_data, current_user, session)
+    product = await create_product(
+        product_data,
+        current_user,
+        session,
+    )
 
-    return product
+    return build_product_response(
+        product,
+        current_user,
+    )
+
+@products_router.patch(
+    "/{product_id}",
+)
+async def update_product_endpoint(
+    product_id: int,
+    product_data: ProductUpdate,
+    session: SessionDep,
+    current_user: User = Depends(
+        require_roles(
+            RoleEnum.USER,
+            RoleEnum.MODERATOR,
+        )
+    ),
+):
+
+    product = await update_product(
+        product_id=product_id,
+        product_data=product_data,
+        current_user=current_user,
+        session=session,
+    )
+
+    return build_product_response(
+        product,
+        current_user,
+    )

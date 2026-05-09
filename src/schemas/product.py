@@ -40,7 +40,6 @@ class ProductBase(BaseModel):
     description: str | None
     price_rub: Decimal
     common_note: str | None
-    special_note: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -48,9 +47,12 @@ class ProductBase(BaseModel):
         from_attributes=True
     )
 
-class ProductRead(ProductBase):
+class ProductReadUser(ProductBase):
     category_id: int
     creator_id: int
+
+class ProductReadModerator(ProductReadUser):
+    special_note: str | None = None
 
 class ProductReadPag(ProductBase):
     category: CategoryShortRead
