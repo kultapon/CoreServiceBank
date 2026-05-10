@@ -70,9 +70,9 @@ async def create_product(
 
     product_rep = ProductRepository(session)
 
-    if_exists = await product_rep.exists(product_data.name)
+    exists = await product_rep.exists(product_data.name)
 
-    if if_exists:
+    if exists:
         raise AppError("Product with this name already exists")
 
     cat_rep = CategoryRepository(session)
@@ -153,18 +153,10 @@ async def update_product(
 
     if "name" in update_data:
 
-        existing_product = await product_rep.get_product_by_name(
-            update_data["name"]
-        )
+        exists = await product_rep.exists(update_data["name"])
 
-        if (
-            existing_product
-            and existing_product.id != product.id
-        ):
-            raise AppError(
-                "Product with this name already exists"
-            )
-
+        if exists:
+            raise AppError("Product with this name already exists")
 
     for field, value in update_data.items():
 
@@ -179,3 +171,13 @@ async def update_product(
     await product_rep.save(product)
 
     return product
+
+async def delete_product(product_id: int, session: AsyncSession):
+    product_rep = ProductRepository(session)
+    product = await product_rep.get_product_by_id(product_id)
+
+    if not product:
+        raise AppError("Product not found")
+    name = product.name
+    await product_rep.delete(product)
+    return name
