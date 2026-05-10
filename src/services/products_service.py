@@ -153,9 +153,9 @@ async def update_product(
 
     if "name" in update_data:
 
-        exists = await product_rep.exists(update_data["name"])
+        exists_id = await product_rep.exists(update_data["name"])
 
-        if exists:
+        if exists_id and exists_id != product.id:
             raise AppError("Product with this name already exists")
 
     for field, value in update_data.items():
@@ -169,7 +169,7 @@ async def update_product(
         setattr(product, field, value)
 
     await product_rep.save(product)
-
+    
     return product
 
 async def delete_product(product_id: int, session: AsyncSession):

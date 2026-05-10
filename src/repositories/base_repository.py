@@ -33,6 +33,7 @@ class BaseRepository(Generic[T]):
     async def save(self, obj: T) -> T:
         self.session.add(obj)
         await self._commit_with_handling()
+        await self.session.refresh(obj)
         return obj
 
     async def delete(self, obj: T) -> None:

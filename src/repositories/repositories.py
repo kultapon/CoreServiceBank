@@ -38,10 +38,10 @@ class UserRepository(BaseRepository[User]):
 
 class ProductRepository(BaseRepository[Product]):
 
-    async def exists(self, name: str) -> bool:
+    async def exists(self, name: str):
         query = select(Product.id).where(Product.name == name)
         result = await self.session.scalar(query)
-        return result is not None
+        return result
 
     async def get_product_by_id(self, product_id: int) -> Product | None:
 
