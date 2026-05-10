@@ -16,15 +16,15 @@ def register_exception_handlers(app):
         logger.warning(f"AppError: {exc.detail}")
         return JSONResponse(
             status_code=exc.status_code,
-            content={"detail": exc.detail},
+            content={"detail": exc.detail}
         )
 
     @app.exception_handler(ValueError)
     async def value_error_handler(_: Request, exc: ValueError):
         logger.warning(f"ValueError: {exc}")
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"detail": str(exc)},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Internal server error"},
         )
 
     @app.exception_handler(ResponseValidationError)
@@ -34,7 +34,7 @@ def register_exception_handlers(app):
         logger.warning("ResponseValError")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": exc.errors()},
+            content={"detail": "Internal server error"},
         )
 
     @app.exception_handler(IntegrityError)
@@ -52,6 +52,7 @@ def register_exception_handlers(app):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "Internal server error"},
         )
+
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(_: Request, exc: Exception):
         logger.exception(f"Unhandled error: {exc}")
