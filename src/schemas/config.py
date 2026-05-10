@@ -1,10 +1,19 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Annotated
+from fastapi import Path as fastapi_Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 ENV = PROJECT_ROOT / ".env"
 
+DBIntID = Annotated[
+    int,
+    fastapi_Path(
+        ge=1,
+        le=2147483647,
+    )
+]
 
 class DBSettings(BaseSettings):
     DATABASE_URL: str

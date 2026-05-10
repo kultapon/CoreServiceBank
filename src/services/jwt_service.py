@@ -43,13 +43,11 @@ def create_refresh_token(user_id: int):
         expires_delta=timedelta(days=jwt_settings.REFRESH_TOKEN_EXPIRE_DAYS),
     )
 
-
-
 def decode_token(token: str, expected_type:str) -> dict:
 
     try:
         payload = jwt.decode(
-            token, jwt_settings.public_key, algorithms=jwt_settings.ALGORITHM
+            token, jwt_settings.JWT_SECRET_KEY, algorithms=jwt_settings.JWT_ALGORITHM
         )
 
         if payload["type"] != expected_type:

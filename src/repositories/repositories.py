@@ -1,8 +1,8 @@
 
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select, delete
+from sqlalchemy.orm import joinedload
 
-from src.models import Role, User
+from src.models import Role, User, Category, Product
 from src.repositories.base_repository import BaseRepository
 
 
@@ -14,31 +14,40 @@ class UserRepository(BaseRepository[User]):
         return result is not None
 
     async def get_user_by_username(self, username: str) -> User | None:
-        result = await self.session.scalars(
-            select(User).where(User.username == username)
-        )
-        return result.one_or_none()
+        return await self.session.scalar(
+            select(User).where(User.username == username))
 
     async def get_user_by_id(self, user_id: int) -> User | None:
         return await self.session.scalar(
             select(User).where(User.id == user_id)
         )
 
-    async def get_user_with_roles(self, user_id: int) -> User | None:
+    async def get_active_user_with_role(
+        self,
+        user_id: int,
+    ) -> User | None:
+
+        query = (
+            select(User)
+            .options(joinedload(User.role))
+            .where(User.id == user_id)
+            .where(User.banned_at.is_(None))
+        )
+
+        return await self.session.scalar(query)
+
+class ProductRepository(BaseRepository[Product]):
+
+    async def exists(self, name: str):
+        query = select(Product.id).where(Product.name == name)
+        result = await self.session.scalar(query)
+        return result
+
+    async def get_product_by_id(self, product_id: int) -> Product | None:
 
         return await self.session.scalar(
-            select(User)
-            .options(selectinload(User.role))
-            .where(User.id == user_id)
-        )
-
-    async def get_users(self, user_ids: list[int]):
-        result = await self.session.scalars(
-            select(User)
-            .options(selectinload(User.role))
-            .where(User.id.in_(user_ids))
-        )
-        return result.all()
+            select(Product)
+            .where(Product.id == product_id))
 
 class RoleRepository(BaseRepository[Role]):
 
@@ -54,3 +63,13 @@ class RoleRepository(BaseRepository[Role]):
         return await self.session.scalar(
             select(Role).where(Role.name == name)
         )
+
+class CategoryRepository(BaseRepository[Category]):
+
+    async def get_category_by_id(
+        self,
+        category_id: int,
+    ) -> Category | None:
+
+        return await self.session.scalar(select(Category).where(
+            Category.id == category_id))
