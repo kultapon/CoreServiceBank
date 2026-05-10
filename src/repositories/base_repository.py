@@ -35,6 +35,10 @@ class BaseRepository(Generic[T]):
         await self._commit_with_handling()
         return obj
 
+    async def delete(self, obj: T) -> None:
+        await self.session.delete(obj)
+        await self._commit_with_handling()
+
     async def save_all(self, objs: list[T]) -> list[T]:
         for obj in objs:
             self.session.add(obj)

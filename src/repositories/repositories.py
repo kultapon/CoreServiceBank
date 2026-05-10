@@ -1,6 +1,6 @@
 
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy import select, delete
+from sqlalchemy.orm import joinedload
 
 from src.models import Role, User, Category, Product
 from src.repositories.base_repository import BaseRepository
@@ -39,7 +39,7 @@ class UserRepository(BaseRepository[User]):
 class ProductRepository(BaseRepository[Product]):
 
     async def exists(self, name: str) -> bool:
-        query = select(User.id).where(Product.name == name)
+        query = select(Product.id).where(Product.name == name)
         result = await self.session.scalar(query)
         return result is not None
 
@@ -48,12 +48,6 @@ class ProductRepository(BaseRepository[Product]):
         return await self.session.scalar(
             select(Product)
             .where(Product.id == product_id))
-
-    async def get_product_by_name(self, product_name: str) -> Product | None:
-
-        return await self.session.scalar(
-            select(Product)
-            .where(Product.name == product_name))
 
 class RoleRepository(BaseRepository[Role]):
 

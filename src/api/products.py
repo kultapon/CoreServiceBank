@@ -11,7 +11,8 @@ from src.api.routers import products_router
 from src.schemas.config import DBIntID
 from src.schemas.product import ProductFilter, ProductCreate, ProductReadPag, ProductUpdate
 from src.schemas.roles import RoleEnum
-from src.services.products_service import build_products_query, create_product, update_product, build_product_response
+from src.services.products_service import build_products_query, create_product, update_product, build_product_response, \
+    delete_product
 
 logger = structlog.getLogger(__name__)
 
@@ -57,7 +58,7 @@ async def made_product(
 
     logger.info(
         event="product_created",
-        user_id=product.id,
+        product_id=product.id,
     )
 
     return build_product_response(
@@ -88,7 +89,7 @@ async def update_product_endpoint(
     )
     logger.info(
         event="product_updated",
-        user_id=product.id,
+        product_id=product.id,
     )
     return build_product_response(
         product,
@@ -98,28 +99,23 @@ async def update_product_endpoint(
 
 @products_router.delete(
     "/{product_id}",
+    status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_product_endpoint(
     product_id: DBIntID,
-    product_data: ProductUpdate,
     session: SessionDep,
     current_user: User = Depends(
-        require_roles(RoleEnum.MODERATOR,)
+        require_roles(RoleEnum.MODERATOR)
     ),
 ):
 
-    product = await update_product(
+    product_name = await delete_product(
         product_id=product_id,
-        product_data=product_data,
-        current_user=current_user,
         session=session,
     )
+
     logger.info(
-        event="product_updated",
-        user_id=product.id,
-    )
-    return build_product_response(
-        product,
-        current_user,
+        event="product_deleted",
+        product_name=product_name,
     )
 
