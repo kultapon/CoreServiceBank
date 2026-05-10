@@ -23,3 +23,21 @@ class UserRead(BaseModel):
     username: str = Field(..., title="Username")
     created_at: datetime = Field(..., title="Created at")
     model_config = ConfigDict(from_attributes=True)
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+
+class TokenResponseLogin(TokenResponse):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "access_token": "eyJhbGciOiJIUzI1NiIs...",
+                "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+                "token_type": "Bearer",
+            }
+        }
+    )
