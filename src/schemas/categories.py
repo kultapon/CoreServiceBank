@@ -24,3 +24,12 @@ class CategoryFilter(BaseModel):
         default="desc",
         pattern="^(asc|desc)$",
     )
+
+class CategoryCreate(BaseModel):
+    name:str = Field(
+        min_length=2,
+        max_length=255,
+    )
+    model_config = ConfigDict(
+        extra="forbid",
+    )
