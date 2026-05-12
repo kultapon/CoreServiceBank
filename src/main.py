@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from src.api.auth import auth_router
 from src.api.products import products_router
+from src.api.categories import categories_router
 from src.core.errors.handlers import register_exception_handlers
 from src.core.logger import setup_logging
 from src.core.middleware import logging_middleware
@@ -11,6 +12,7 @@ app = FastAPI(title="CoreService")
 
 app.include_router(auth_router)
 app.include_router(products_router)
+app.include_router(categories_router)
 
 setup_logging()
 setup_sentry()
