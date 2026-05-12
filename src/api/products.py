@@ -9,7 +9,7 @@ from src.database import SessionDep
 from src.models import User
 from src.api.routers import products_router
 from src.schemas.config import DBIntID
-from src.schemas.product import ProductFilter, ProductCreate, ProductReadPag, ProductUpdate
+from src.schemas.products import ProductFilter, ProductCreate, ProductReadPag, ProductUpdate
 from src.schemas.roles import RoleEnum
 from src.services.products_service import build_products_query, create_product, update_product, build_product_response, \
     delete_product
