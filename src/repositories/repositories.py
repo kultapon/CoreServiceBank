@@ -66,6 +66,11 @@ class RoleRepository(BaseRepository[Role]):
 
 class CategoryRepository(BaseRepository[Category]):
 
+    async def exists(self, name: str):
+        query = select(Category.id).where(Category.name == name)
+        result = await self.session.scalar(query)
+        return result
+
     async def get_category_by_id(
         self,
         category_id: int,

@@ -1,12 +1,12 @@
-from fastapi import Depends, HTTPException, status, Header
+from fastapi import Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repositories.repositories import UserRepository
 from src.services.jwt_service import decode_token
 from src.database import get_session
 from src.models import User
 from src.schemas.roles import RoleEnum
-from src.core.errors.errors import TokenError, AppError, ForbiddenError
+from src.core.errors.errors import TokenError, ForbiddenError
+from src.services.user_service import get_user_by_id
 
 SessionDep = Depends(get_session)
 
@@ -37,14 +37,7 @@ async def get_current_user(
     if user_id is None:
         raise TokenError("Token Error")
 
-    usr_rep = UserRepository(session)
-
-    user = await usr_rep.get_active_user_with_role(int(user_id))
-
-    if not user:
-        raise AppError("User not found")
-
-    return user
+    return await get_user_by_id(int(user_id), session)
 
 
 def require_roles(*allowed_roles: RoleEnum):

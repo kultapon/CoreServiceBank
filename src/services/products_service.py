@@ -6,9 +6,10 @@ from src.core.errors.errors import AppError, ForbiddenError, UniqueConstraintErr
 from src.repositories.repositories import CategoryRepository, ProductRepository
 from src.schemas.roles import RoleEnum
 from src.models import Product, User
-from src.schemas.product import ProductFilter, ProductCreate, ProductUpdate, ProductReadModerator, ProductReadUser
+from src.schemas.products import ProductFilter, ProductCreate, ProductUpdate, ProductReadModerator, ProductReadUser
 
 PRODUCT_SORT_FIELDS = {
+    "id": Product.id,
     "created_at": Product.created_at,
     "price_rub": Product.price_rub,
     "name": Product.name,
@@ -167,8 +168,15 @@ async def update_product(
             continue
 
         setattr(product, field, value)
+    try:
+        await product_rep.save(product)
 
-    await product_rep.save(product)
+    except UniqueConstraintError as e:
+        msg = str(e.__cause__ or e)
+        if "unique" in msg.lower():
+            raise AppError("Product with this name already exists")
+        else:
+            raise AppError(msg)
     
     return product
 

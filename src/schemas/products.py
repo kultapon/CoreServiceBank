@@ -1,6 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Literal
 
+from src.schemas.categories import CategoryBase
 from pydantic import (
     BaseModel,
     Field, ConfigDict,
@@ -8,9 +10,10 @@ from pydantic import (
 )
 
 class ProductFilter(BaseModel):
-    category_id: int | None = None
+    category_id: int | None = Field(None,ge=1,
+        le=2147483647)
 
-    sort_by: str = "created_at"
+    sort_by: Literal["id", "username", "price_rub", "created_at"] = "created_at"
 
     order: str = Field(
         default="desc",
@@ -21,14 +24,6 @@ class ProductFilter(BaseModel):
 class CreatorShortRead(BaseModel):
     id: int
     username: str
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-class CategoryShortRead(BaseModel):
-    id: int
-    name: str
 
     model_config = ConfigDict(
         from_attributes=True
@@ -55,7 +50,7 @@ class ProductReadModerator(ProductReadUser):
     special_note: str | None = None
 
 class ProductReadPag(ProductBase):
-    category: CategoryShortRead
+    category: CategoryBase
     creator: CreatorShortRead
 
 class ProductCreate(BaseModel):
