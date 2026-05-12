@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload, with_expression
 
 from src.core.errors.errors import AppError, ForbiddenError, UniqueConstraintError
 from src.repositories.repositories import CategoryRepository, ProductRepository
-from src.schemas.categories import CategoryFilter
+from src.schemas.categories import CategoryFilter, CategoryCreate
 from src.schemas.roles import RoleEnum
 from src.models import Product, User, Category\
 
@@ -19,9 +19,6 @@ def build_categories_query(
     filters: CategoryFilter
 ):
     query = select(Category)
-
-
-
     sort_col = CATEGORY_SORT_FIELDS.get(
         filters.sort_by,
         Product.created_at,
@@ -34,3 +31,32 @@ def build_categories_query(
     )
 
     return query
+
+async def create_category(
+    category_data: CategoryCreate,
+    session: AsyncSession
+) -> Category:
+
+    cat_rep = CategoryRepository(session)
+
+    exists = await cat_rep.exists(category_data.name)
+
+    if exists:
+        raise AppError("Category with this name already exists")
+
+
+    category = Category(name=category_data.name)
+
+    try:
+
+        await cat_rep.save(category)
+
+    except UniqueConstraintError as e:
+        msg = str(e.__cause__ or e)
+        if "unique" in msg.lower():
+            raise AppError("Product with this name already exists")
+        else:
+            raise AppError(msg)
+
+
+    return category
