@@ -168,8 +168,15 @@ async def update_product(
             continue
 
         setattr(product, field, value)
+    try:
+        await product_rep.save(product)
 
-    await product_rep.save(product)
+    except UniqueConstraintError as e:
+        msg = str(e.__cause__ or e)
+        if "unique" in msg.lower():
+            raise AppError("Product with this name already exists")
+        else:
+            raise AppError(msg)
     
     return product
 

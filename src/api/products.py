@@ -104,7 +104,7 @@ async def update_product_endpoint(
 async def delete_product_endpoint(
     product_id: DBIntID,
     session: SessionDep,
-    current_user: User = Depends(
+    _: User = Depends(
         require_roles(RoleEnum.MODERATOR)
     ),
 ):

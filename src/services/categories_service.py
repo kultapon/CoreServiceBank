@@ -54,9 +54,41 @@ async def create_category(
     except UniqueConstraintError as e:
         msg = str(e.__cause__ or e)
         if "unique" in msg.lower():
-            raise AppError("Product with this name already exists")
+            raise AppError("Category with this name already exists")
         else:
             raise AppError(msg)
 
+
+    return category
+
+
+async def update_category(
+        category_id: int,
+        update_data: CategoryCreate,
+        session: AsyncSession,
+) -> Category:
+    cat_rep = CategoryRepository(session)
+
+    category = await cat_rep.get_category_by_id(category_id)
+
+    if not category:
+        raise AppError("Category not found")
+
+    exists_id = await cat_rep.exists(update_data.name)
+
+    if exists_id and exists_id != category.id:
+        raise AppError("Category with this name already exists")
+
+    category.name = update_data.name
+
+    try:
+        await cat_rep.save(category)
+
+    except UniqueConstraintError as e:
+        msg = str(e.__cause__ or e)
+        if "unique" in msg.lower():
+            raise AppError("Product with this name already exists")
+        else:
+            raise AppError(msg)
 
     return category
