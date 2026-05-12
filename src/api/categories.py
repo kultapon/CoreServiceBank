@@ -12,7 +12,7 @@ from src.schemas.categories import CategoryFilter, CategoryRead, CategoryCreate
 from src.schemas.config import DBIntID
 from src.schemas.products import ProductCreate
 from src.schemas.roles import RoleEnum
-from src.services.categories_service import build_categories_query, create_category, update_category
+from src.services.categories_service import build_categories_query, create_category, update_category, delete_category
 
 logger = structlog.getLogger(__name__)
 
@@ -86,3 +86,25 @@ async def update_product_endpoint(
         product_id=category.id,
     )
     return category
+
+@categories_router.delete(
+    "/{category_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_category_endpoint(
+    category_id: DBIntID,
+    session: SessionDep,
+    _: User = Depends(
+        require_roles(RoleEnum.MODERATOR)
+    ),
+):
+
+    category_name = await delete_category(
+        category_id=category_id,
+        session=session,
+    )
+
+    logger.info(
+        event="category_deleted",
+        category_name=category_name,
+    )

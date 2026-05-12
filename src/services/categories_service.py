@@ -92,3 +92,14 @@ async def update_category(
             raise AppError(msg)
 
     return category
+
+async def delete_category(category_id: int, session: AsyncSession):
+    cat_rep = CategoryRepository(session)
+    category = await cat_rep.get_category_by_id(category_id)
+
+    if not category:
+        raise AppError("Category not found")
+
+    name = category.name
+    await cat_rep.delete(category)
+    return name
