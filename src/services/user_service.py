@@ -73,7 +73,7 @@ async def unban_user_mod(
     usr_rep = UserRepository(session)
     await usr_rep.save(user)
 
-async def change_password(user_id: int, new_password: str, current_user, session: AsyncSession):
+async def change_password(user_id: int, new_password: str, current_user: User, session: AsyncSession):
 
     user = await get_user_by_id(user_id, session)
 
@@ -87,3 +87,25 @@ async def change_password(user_id: int, new_password: str, current_user, session
     usr_rep = UserRepository(session)
     await usr_rep.save(user)
     return user.id
+
+async def delete_user(user_id: int, current_user: User, session: AsyncSession):
+
+    usr_rep = UserRepository(session)
+
+    user = await usr_rep.get_user_by_id(user_id)
+
+    if not user:
+        raise AppError("User not found")
+
+    if user.id == current_user.id:
+        raise AppError("Cannot delete yourself")
+
+    if user.role.name == RoleEnum.ADMIN:
+        raise AppError("Cannot delete other Admins")
+
+    usr_rep = UserRepository(session)
+
+    user_id = user.id
+    await usr_rep.delete(user)
+
+    return user_id
