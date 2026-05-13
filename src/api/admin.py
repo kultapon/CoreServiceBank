@@ -1,3 +1,4 @@
+import structlog
 from fastapi import Depends, Body, status
 
 from src.api.routers import admin_router
@@ -6,9 +7,11 @@ from src.dependencies import require_roles
 from src.models import User
 from src.schemas.config import DBIntID
 from src.schemas.roles import RoleEnum
-from src.schemas.user import BanReason
+from src.schemas.user import BanReason, UserRead
+from src.services.auth_service import register_user
 from src.services.user_service import ban_user_mod, unban_user_mod
-
+from src.schemas.user import UserAuth
+logger = structlog.getLogger(__name__)
 
 @admin_router.patch("/ban/{user_id}")
 async def ban_user(
@@ -36,3 +39,23 @@ async def unban_user(
         ),
 ):
     await unban_user_mod(user_id, current_user, session)
+
+
+
+@admin_router.post("",response_model=UserRead)
+async def create_user_admin(
+    session: SessionDep,
+    usr_params: UserAuth,
+    _: User = Depends(
+            require_roles(
+                RoleEnum.ADMIN,
+            )
+        )
+
+):
+    created_user = await register_user(usr_params, session)
+    logger.info(
+        event="admin_user_created",
+        user_id=created_user.id,
+    )
+    return created_user
