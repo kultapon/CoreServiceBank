@@ -1,17 +1,35 @@
 import structlog
-from fastapi import Depends, Body, status
-
+from fastapi import Depends, status
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import apaginate
 from src.api.routers import admin_router
 from src.database import SessionDep
 from src.dependencies import require_roles
 from src.models import User
 from src.schemas.config import DBIntID
 from src.schemas.roles import RoleEnum
-from src.schemas.user import BanReason, UserRead, PasswordChange
+from src.schemas.user import BanReason, UserRead, PasswordChange, UserFilter, UserReadPag
 from src.services.auth_service import register_user
-from src.services.user_service import ban_user_mod, unban_user_mod, change_password, delete_user
+from src.services.user_service import ban_user_mod, unban_user_mod, change_password, delete_user, build_users_query
 from src.schemas.user import UserAuth
+
 logger = structlog.getLogger(__name__)
+
+
+@admin_router.get("", response_model=Page[UserReadPag])
+async def get_users(
+    session: SessionDep,
+    filters: UserFilter = Depends(),
+    params: Params = Depends(),
+    _: User = Depends(require_roles(RoleEnum.ADMIN))
+):
+    query = build_users_query(filters)
+    return await apaginate(
+        session,
+        query,
+        params,
+    )
+
 
 @admin_router.patch("/ban/{user_id}")
 async def ban_user(
