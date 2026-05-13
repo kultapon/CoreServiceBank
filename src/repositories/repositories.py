@@ -19,7 +19,7 @@ class UserRepository(BaseRepository[User]):
 
     async def get_user_by_id(self, user_id: int) -> User | None:
         return await self.session.scalar(
-            select(User).where(User.id == user_id)
+            select(User).options(joinedload(User.role)).where(User.id == user_id)
         )
 
     async def get_active_user_with_role(
