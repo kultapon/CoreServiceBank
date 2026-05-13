@@ -1,12 +1,20 @@
 import datetime
-
+from sqlalchemy import asc, desc, select, literal
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.errors.errors import AppError
 from src.models import User
 from src.repositories.repositories import UserRepository
 from src.schemas.roles import RoleEnum
+from src.schemas.user import UserFilter
 from src.services.auth_service import pwd_hasher
+
+USER_SORT_FIELDS = {
+    "id": User.id,
+    "created_at": User.created_at,
+    "username": User.username,
+}
 
 async def get_user_by_id(
     user_id: int,
@@ -21,6 +29,32 @@ async def get_user_by_id(
 
     return user
 
+def build_users_query(
+    filter_obj: UserFilter
+):
+    query = select(User)
+
+    if filter_obj.created_from:
+        query = query.where(User.created_at >= filter_obj.created_from)
+
+    if filter_obj.created_to:
+        query = query.where(User.created_at <= filter_obj.created_to)
+
+    if not filter_obj.include_banned:
+        query = query.where(User.banned_at.is_(None))
+
+    sort_col = USER_SORT_FIELDS.get(
+        filter_obj.sort_by,
+        User.created_at,
+    )
+
+    query = query.order_by(
+        desc(sort_col)
+        if filter_obj.order == "desc"
+        else asc(sort_col)
+    )
+
+    return query
 
 async def check_user(user_id:int, session:AsyncSession):
     return await get_user_by_id(user_id, session)

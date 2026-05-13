@@ -26,7 +26,7 @@ async def get_products(
     current_user: User = Depends(require_roles(RoleEnum.USER,RoleEnum.MODERATOR))
 ):
     query = build_products_query(
-        filters=filters,
+        filter_obj=filters,
         current_user=current_user,
     )
     return await apaginate(
