@@ -26,7 +26,7 @@ async def get_categories(
     _: User = Depends(require_roles(RoleEnum.MODERATOR))
 ):
     query = build_categories_query(
-        filters=filters
+        filter_obj=filters
     )
     return await apaginate(
         session,

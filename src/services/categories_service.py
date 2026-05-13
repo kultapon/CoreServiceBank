@@ -16,17 +16,17 @@ CATEGORY_SORT_FIELDS = {
 
 
 def build_categories_query(
-    filters: CategoryFilter
+    filter_obj: CategoryFilter
 ):
     query = select(Category)
     sort_col = CATEGORY_SORT_FIELDS.get(
-        filters.sort_by,
+        filter_obj.sort_by,
         Product.created_at,
     )
 
     query = query.order_by(
         desc(sort_col)
-        if filters.order == "desc"
+        if filter_obj.order == "desc"
         else asc(sort_col)
     )
 
