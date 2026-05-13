@@ -7,9 +7,9 @@ from src.dependencies import require_roles
 from src.models import User
 from src.schemas.config import DBIntID
 from src.schemas.roles import RoleEnum
-from src.schemas.user import BanReason, UserRead
+from src.schemas.user import BanReason, UserRead, PasswordChange
 from src.services.auth_service import register_user
-from src.services.user_service import ban_user_mod, unban_user_mod
+from src.services.user_service import ban_user_mod, unban_user_mod, change_password
 from src.schemas.user import UserAuth
 logger = structlog.getLogger(__name__)
 
@@ -17,14 +17,14 @@ logger = structlog.getLogger(__name__)
 async def ban_user(
     session: SessionDep,
     user_id: DBIntID,
-    ban_reason: BanReason = Body(..., embed=True),
+    ban_reason: BanReason,
     current_user: User = Depends(
         require_roles(
         RoleEnum.ADMIN,
         )
     ),
 ):
-    banned_at = await ban_user_mod(user_id, ban_reason, current_user, session)
+    banned_at = await ban_user_mod(user_id, ban_reason.ban_reason, current_user, session)
 
     return {"banned_at": banned_at}
 
@@ -59,3 +59,21 @@ async def create_user_admin(
         user_id=created_user.id,
     )
     return created_user
+
+@admin_router.patch("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_user_password(
+    user_id: DBIntID,
+    session: SessionDep,
+    password: PasswordChange,
+    current_user: User = Depends(
+            require_roles(
+                RoleEnum.ADMIN,
+            )
+        )
+
+):
+    user_id = await change_password(user_id, password.password, current_user, session)
+    logger.info(
+        event="admin_user_password_changed",
+        user_id=user_id,
+    )

@@ -6,7 +6,7 @@ from src.core.errors.errors import AppError
 from src.models import User
 from src.repositories.repositories import UserRepository
 from src.schemas.roles import RoleEnum
-
+from src.services.auth_service import pwd_hasher
 
 async def get_user_by_id(
     user_id: int,
@@ -31,9 +31,9 @@ async def ban_user_mod(
     user = await get_user_by_id(user_id, session)
 
     if user.id == current_user.id:
-        raise AppError("You can't ban yourself")
+        raise AppError("You cannot ban yourself")
 
-    if current_user.role.name == user.role.name and current_user.role.name == RoleEnum.ADMIN:
+    if user.role.name == RoleEnum.ADMIN:
         raise AppError("Cannot ban other admins")
 
     if user.banned_at:
@@ -64,7 +64,7 @@ async def unban_user_mod(
     if user.banned_at is None:
         raise AppError("User is already unbanned")
 
-    if current_user.role.name == user.role.name and current_user.role.name == RoleEnum.ADMIN:
+    if user.role.name == RoleEnum.ADMIN:
         raise AppError("Cannot unban other admins")
 
     user.banned_at = None
@@ -72,3 +72,18 @@ async def unban_user_mod(
 
     usr_rep = UserRepository(session)
     await usr_rep.save(user)
+
+async def change_password(user_id: int, new_password: str, current_user, session: AsyncSession):
+
+    user = await get_user_by_id(user_id, session)
+
+    if user.role.name == RoleEnum.ADMIN and user.id != current_user.id:
+        raise AppError("Cannot change other admins passwords")
+
+    hashed = pwd_hasher.hash(new_password)
+
+    user.password_hash = hashed
+
+    usr_rep = UserRepository(session)
+    await usr_rep.save(user)
+    return user.id

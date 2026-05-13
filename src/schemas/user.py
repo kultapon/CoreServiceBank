@@ -7,9 +7,12 @@ from pydantic import (
 
 )
 
-BanReason = Annotated[
-    str, Field(..., min_length=5, max_length=100, title="Ban Reason")
-]
+class BanReason (BaseModel):
+    ban_reason: str = Field(..., min_length=5, max_length=100, title="Ban Reason")
+
+class PasswordChange(BaseModel):
+    password: str = Field(..., min_length=8, max_length=64,
+                          pattern="^[A-Za-z0-9]+$")
 
 class UserAuth(BaseModel):
     username: str = Field(
@@ -20,7 +23,8 @@ class UserAuth(BaseModel):
         min_length=5,
         max_length=50,
     )
-    password: str = Field(..., min_length=8, max_length=64)
+    password: str = Field(..., min_length=8, max_length=64,
+        pattern="^[A-Za-z0-9]+$")
 
 
 class UserRead(BaseModel):
