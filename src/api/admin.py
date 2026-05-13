@@ -9,7 +9,7 @@ from src.schemas.config import DBIntID
 from src.schemas.roles import RoleEnum
 from src.schemas.user import BanReason, UserRead, PasswordChange
 from src.services.auth_service import register_user
-from src.services.user_service import ban_user_mod, unban_user_mod, change_password
+from src.services.user_service import ban_user_mod, unban_user_mod, change_password, delete_user
 from src.schemas.user import UserAuth
 logger = structlog.getLogger(__name__)
 
@@ -75,5 +75,22 @@ async def update_user_password(
     user_id = await change_password(user_id, password.password, current_user, session)
     logger.info(
         event="admin_user_password_changed",
+        user_id=user_id,
+    )
+
+@admin_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user_admin(
+    user_id: DBIntID,
+    session: SessionDep,
+    current_user: User = Depends(
+            require_roles(
+                RoleEnum.ADMIN,
+            )
+        )
+
+):
+    user_id = await delete_user(user_id, current_user, session)
+    logger.info(
+        event="admin_user_deleted",
         user_id=user_id,
     )

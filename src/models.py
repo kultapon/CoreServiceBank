@@ -57,7 +57,7 @@ class User(Base, BaseMixin):
         back_populates="users",
     )
 
-    products: Mapped[list["Product"]] = relationship(back_populates="creator")
+    products: Mapped[list["Product"]] = relationship(back_populates="creator", passive_deletes=True, cascade="all, delete")
 
 
 
@@ -123,8 +123,8 @@ class Product(Base, BaseMixin):
     )
 
     creator_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"),
-        nullable=False, index=True,
+        ForeignKey("users.id", ondelete="CASCADE",),
+        nullable=False, index=True
     )
 
 
