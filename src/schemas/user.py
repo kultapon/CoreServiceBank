@@ -1,10 +1,15 @@
 from datetime import datetime
+from typing import Annotated
+
 from pydantic import (
     BaseModel,
     Field, ConfigDict,
 
 )
 
+BanReason = Annotated[
+    str, Field(..., min_length=5, max_length=100, title="Ban Reason")
+]
 
 class UserAuth(BaseModel):
     username: str = Field(
