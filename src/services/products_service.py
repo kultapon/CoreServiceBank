@@ -1,4 +1,4 @@
-from sqlalchemy import asc, desc, select, literal
+from sqlalchemy import asc, desc, select, literal, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, with_expression
 
@@ -48,6 +48,14 @@ def build_products_query(
     if filter_obj.category_id:
         query = query.where(
             Product.category_id == filter_obj.category_id
+        )
+
+    if filter_obj.q:
+        query = query.where(
+            or_(
+                Product.name.ilike(f"%{filter_obj.q}%"),
+                Product.description.ilike(f"%{filter_obj.q}%"),
+            )
         )
 
     sort_col = PRODUCT_SORT_FIELDS.get(

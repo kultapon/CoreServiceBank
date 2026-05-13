@@ -10,6 +10,7 @@ from pydantic import (
 )
 
 class ProductFilter(BaseModel):
+    q: str | None = None
     category_id: int | None = Field(None,ge=1,
         le=2147483647)
 
