@@ -1,9 +1,29 @@
 from datetime import datetime
+from typing import Annotated, Literal
+
 from pydantic import (
     BaseModel,
     Field, ConfigDict,
 
 )
+
+class BanReason (BaseModel):
+    ban_reason: str = Field(..., min_length=5, max_length=100, title="Ban Reason")
+
+class PasswordChange(BaseModel):
+    password: str = Field(..., min_length=8, max_length=64,
+                          pattern="^[A-Za-z0-9]+$")
+
+class UserFilter(BaseModel):
+
+    sort_by: Literal["id", "username", "created_at"] = "created_at"
+    created_from: datetime | None = None
+    created_to: datetime | None = None
+    include_banned: bool = False
+    order: str = Field(
+        default="desc",
+        pattern="^(asc|desc)$",
+    )
 
 
 class UserAuth(BaseModel):
@@ -15,7 +35,8 @@ class UserAuth(BaseModel):
         min_length=5,
         max_length=50,
     )
-    password: str = Field(..., min_length=8, max_length=64)
+    password: str = Field(..., min_length=8, max_length=64,
+        pattern="^[A-Za-z0-9]+$")
 
 
 class UserRead(BaseModel):
@@ -24,6 +45,9 @@ class UserRead(BaseModel):
     created_at: datetime = Field(..., title="Created at")
     model_config = ConfigDict(from_attributes=True)
 
+class UserReadPag(UserRead):
+    banned_at: datetime | None = None
+    ban_reason: str | None = None
 
 class TokenResponse(BaseModel):
     access_token: str

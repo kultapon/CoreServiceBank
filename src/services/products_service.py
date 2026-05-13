@@ -26,7 +26,7 @@ def build_product_response(
     return ProductReadUser.model_validate(product)
 
 def build_products_query(
-    filters: ProductFilter,
+    filter_obj: ProductFilter,
     current_user: User,
 ):
     query = (
@@ -45,19 +45,19 @@ def build_products_query(
             )
         )
 
-    if filters.category_id:
+    if filter_obj.category_id:
         query = query.where(
-            Product.category_id == filters.category_id
+            Product.category_id == filter_obj.category_id
         )
 
     sort_col = PRODUCT_SORT_FIELDS.get(
-        filters.sort_by,
+        filter_obj.sort_by,
         Product.created_at,
     )
 
     query = query.order_by(
         desc(sort_col)
-        if filters.order == "desc"
+        if filter_obj.order == "desc"
         else asc(sort_col)
     )
 
