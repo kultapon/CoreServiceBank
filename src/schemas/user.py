@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 
 from pydantic import (
     BaseModel,
-    Field, ConfigDict,
+    Field, ConfigDict, field_validator,
 
 )
 
@@ -43,7 +43,15 @@ class UserRead(BaseModel):
     id: int = Field(..., title="User ID")
     username: str = Field(..., title="Username")
     created_at: datetime = Field(..., title="Created at")
+    role: str
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def serialize_roles(cls, role):
+        if not role:
+            return []
+        return role.name if hasattr(role, "name") else str(role)
 
 class UserReadPag(UserRead):
     banned_at: datetime | None = None
