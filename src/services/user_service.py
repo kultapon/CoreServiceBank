@@ -1,7 +1,8 @@
 import datetime
-from sqlalchemy import asc, desc, select, literal
+from sqlalchemy import asc, desc
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.core.errors.errors import AppError
 from src.models import User
@@ -32,7 +33,7 @@ async def get_user_by_id(
 def build_users_query(
     filter_obj: UserFilter
 ):
-    query = select(User)
+    query = select(User).options(selectinload(User.role))
 
     if filter_obj.created_from:
         query = query.where(User.created_at >= filter_obj.created_from)

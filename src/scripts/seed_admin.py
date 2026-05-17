@@ -1,5 +1,5 @@
 import asyncio
-import logging
+import structlog
 from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,7 @@ from src.database import SessionLocal
 from src.models import User, Role
 from src.schemas.config import db_settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.getLogger(__name__)
 
 pwd_hasher = PasswordHash.recommended()
 
@@ -16,12 +16,25 @@ pwd_hasher = PasswordHash.recommended()
 async def seed_admin(session: AsyncSession) -> None:
     admin_username = db_settings.ADMIN_USERNAME
     admin_password = db_settings.ADMIN_PASSWORD
+    password_hash = pwd_hasher.hash(admin_password)
+
     existing_admin = await session.scalar(
         select(User).where(User.username == admin_username)
     )
 
     if existing_admin:
-        logger.info("Admin already exists, skipping creation.")
+        if pwd_hasher.verify(admin_password, existing_admin.password_hash):
+            logger.info(
+                event="admin_user_creation_skipped",
+                user_id=existing_admin.id,
+            )
+        else:
+            logger.info(
+                event="admin_user_set_password",
+                user_id=existing_admin.id,
+            )
+            existing_admin.password_hash = password_hash
+            await session.commit()
         return
 
     admin_role = await session.scalar(
@@ -30,7 +43,7 @@ async def seed_admin(session: AsyncSession) -> None:
 
     if not admin_role:
         raise RuntimeError("Required roles are missing. Run roles seed first.")
-    password_hash = pwd_hasher.hash(admin_password)
+
     admin_user = User(
         username=admin_username,
         password_hash=password_hash,
