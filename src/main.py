@@ -9,6 +9,10 @@ from src.core.errors.handlers import register_exception_handlers
 from src.core.logger import setup_logging
 from src.core.middleware import logging_middleware
 from src.core.sentry import setup_sentry
+from fastapi.middleware.cors import (
+    CORSMiddleware,
+)
+
 
 app = FastAPI(title="CoreService")
 
@@ -23,7 +27,20 @@ setup_sentry()
 
 
 register_exception_handlers(app)
-app.middleware("http")(logging_middleware)
 
+app.middleware("http")(logging_middleware)
+app.add_middleware(
+    CORSMiddleware,
+
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+
+    allow_credentials=True,
+
+    allow_methods=["*"],
+
+    allow_headers=["*"],
+)
 if __name__ == "__main__":
     uvicorn.run("src.main:app", port=8000, reload=True)
