@@ -38,11 +38,8 @@ class UserRepository(BaseRepository[User]):
 
     async def save(self, obj: User) -> User:
         self.session.add(obj)
-
-        await self._commit_with_handling()
-
+        await self.session.flush()
         await self.session.refresh(obj, ["role"])
-
         return obj
 
 class ProductRepository(BaseRepository[Product]):
