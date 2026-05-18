@@ -1,12 +1,12 @@
 from sqlalchemy import asc, desc, select, literal, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, with_expression
-
-from src.core.errors.errors import AppError, ForbiddenError, UniqueConstraintError
+from src.services.currency import get_usd_rate
+from src.core.errors.errors import AppError, UniqueConstraintError
 from src.repositories.repositories import CategoryRepository, ProductRepository
 from src.schemas.roles import RoleEnum
 from src.models import Product, User
-from src.schemas.products import ProductFilter, ProductCreate, ProductUpdate, ProductReadModerator, ProductReadUser
+from src.schemas.products import ProductFilter, ProductCreate, ProductUpdate, ProductReadModerator, ProductReadUser, ConvertResponse
 
 PRODUCT_SORT_FIELDS = {
     "id": Product.id,
@@ -197,3 +197,15 @@ async def delete_product(product_id: int, session: AsyncSession):
     name = product.name
     await product_rep.delete(product)
     return name
+
+async def calculate_product_usd_price(product_id: int, session: AsyncSession):
+    product_rep = ProductRepository(session)
+    product = await product_rep.get_product_by_id(product_id)
+
+    if not product:
+        raise AppError("Product not found")
+
+    usd_rate = await get_usd_rate()
+    amount_usd = round(float(product.price_rub) / usd_rate, 2)
+    convert_response= ConvertResponse(price_rub=product.price_rub, usd_rate=usd_rate, price_usd=amount_usd)
+    return convert_response

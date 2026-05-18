@@ -20,6 +20,7 @@ pyjwt = "^2.12.1"
 structlog = "^25.5.0"
 sentry-sdk = "^2.59.0"
 fastapi-pagination = "^0.15.12"
+httpx = "^0.28.1"
 
 
 [build-system]

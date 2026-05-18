@@ -22,6 +22,11 @@ class ProductFilter(BaseModel):
     )
 
 
+class ConvertResponse(BaseModel):
+    price_rub: Decimal
+    usd_rate: Decimal
+    price_usd: Decimal
+
 class CreatorShortRead(BaseModel):
     id: int
     username: str
@@ -53,6 +58,7 @@ class ProductReadModerator(ProductReadUser):
 class ProductReadPag(ProductBase):
     category: CategoryBase
     creator: CreatorShortRead
+    special_note: str | None = None
 
 class ProductCreate(BaseModel):
     name: str = Field(

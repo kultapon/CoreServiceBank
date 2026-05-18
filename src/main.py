@@ -13,7 +13,6 @@ from fastapi.middleware.cors import (
     CORSMiddleware,
 )
 
-
 app = FastAPI(title="CoreService")
 
 app.include_router(admin_router)
