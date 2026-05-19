@@ -84,3 +84,9 @@ class CategoryRepository(BaseRepository[Category]):
 
         return await self.session.scalar(select(Category).where(
             Category.id == category_id))
+
+    async def get_categories(
+        self,
+    ):
+        result = await self.session.scalars(select(Category))
+        return result.all()

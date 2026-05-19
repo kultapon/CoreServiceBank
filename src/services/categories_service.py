@@ -15,6 +15,11 @@ CATEGORY_SORT_FIELDS = {
 }
 
 
+async def get_all_categories_no_pag(session: AsyncSession):
+    cat_rep = CategoryRepository(session)
+    categories = await cat_rep.get_categories()
+    return categories
+
 def build_categories_query(
     filter_obj: CategoryFilter
 ):
