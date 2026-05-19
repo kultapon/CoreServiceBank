@@ -14,7 +14,7 @@ class ProductFilter(BaseModel):
     category_id: int | None = Field(None,ge=1,
         le=2147483647)
 
-    sort_by: Literal["id", "username", "price_rub", "created_at"] = "created_at"
+    sort_by: Literal["id", "name", "price_rub", "created_at"] = "created_at"
 
     order: str = Field(
         default="desc",
