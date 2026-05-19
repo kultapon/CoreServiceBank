@@ -11,9 +11,20 @@ from src.api.routers import categories_router
 from src.schemas.categories import CategoryFilter, CategoryRead, CategoryCreate
 from src.schemas.config import DBIntID
 from src.schemas.roles import RoleEnum
-from src.services.categories_service import build_categories_query, create_category, update_category, delete_category
+from src.services.categories_service import build_categories_query, create_category, update_category, delete_category, get_all_categories_no_pag
 
 logger = structlog.getLogger(__name__)
+
+@categories_router.get(
+    "/all", response_model= list[CategoryRead]
+)
+async def get_all_categories(
+    session: SessionDep,
+    _: User = Depends(require_roles(RoleEnum.USER,RoleEnum.MODERATOR))
+):
+    categories = await get_all_categories_no_pag(session)
+    return categories
+
 
 @categories_router.get(
     "", response_model=Page[CategoryRead]
