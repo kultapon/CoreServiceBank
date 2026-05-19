@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Annotated, Literal
+from typing import Literal
 
 from pydantic import (
     BaseModel,
-    Field, ConfigDict,
+    Field, ConfigDict, model_validator, field_validator,
 
 )
 
@@ -40,9 +40,18 @@ class UserAuth(BaseModel):
 
 
 class UserRead(BaseModel):
-    id: int = Field(..., title="User ID")
-    username: str = Field(..., title="Username")
-    created_at: datetime = Field(..., title="Created at")
+    id: int
+    username: str
+    created_at: datetime
+    role: str
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def serialize_roles(cls, role):
+        if not role:
+            return None
+        return role.name if hasattr(role, "name") else str(role)
+
     model_config = ConfigDict(from_attributes=True)
 
 class UserReadPag(UserRead):

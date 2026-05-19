@@ -12,9 +12,27 @@ from src.schemas.config import DBIntID
 from src.schemas.products import ProductFilter, ProductCreate, ProductReadPag, ProductUpdate
 from src.schemas.roles import RoleEnum
 from src.services.products_service import build_products_query, create_product, update_product, build_product_response, \
-    delete_product
+    delete_product, calculate_product_usd_price
 
 logger = structlog.getLogger(__name__)
+
+@products_router.get(
+    "/usd-price/{product_id}"
+)
+async def get_usd_price(
+    product_id: DBIntID,
+    session: SessionDep,
+
+    _: User = Depends(require_roles(RoleEnum.USER,RoleEnum.MODERATOR))
+):
+    converted = calculate_product_usd_price(product_id, session)
+    logger.info(
+        event="product_price_converation",
+        product_id=product_id,
+    )
+    return await converted
+
+
 
 @products_router.get(
     "", response_model=Page[ProductReadPag]

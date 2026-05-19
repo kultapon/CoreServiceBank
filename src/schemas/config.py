@@ -1,4 +1,6 @@
 from pathlib import Path
+
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Annotated
 from fastapi import Path as fastapi_Path
@@ -42,7 +44,12 @@ class LoggingSettings(BaseSettings):
     SENTRY_DSN: str | None = None
     ENVIRONMENT: str = "development"
     SENTRY_TRACES_SAMPLE_RATE: float = 1.0
-    model_config = SettingsConfigDict(env_file=ENV, extra="ignore", )
+    model_config = SettingsConfigDict(env_file=ENV, extra="ignore")
 
 
 log_settings = LoggingSettings()
+
+class ApiBank(BaseModel):
+    API_BANK_URL: str = "https://api.nbrb.by/exrates/rates/USD?parammode=2"
+
+api_bank= ApiBank()

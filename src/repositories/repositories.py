@@ -36,6 +36,12 @@ class UserRepository(BaseRepository[User]):
 
         return await self.session.scalar(query)
 
+    async def save(self, obj: User) -> User:
+        self.session.add(obj)
+        await self.session.flush()
+        await self.session.refresh(obj, ["role"])
+        return obj
+
 class ProductRepository(BaseRepository[Product]):
 
     async def exists(self, name: str):
@@ -78,3 +84,9 @@ class CategoryRepository(BaseRepository[Category]):
 
         return await self.session.scalar(select(Category).where(
             Category.id == category_id))
+
+    async def get_categories(
+        self,
+    ):
+        result = await self.session.scalars(select(Category))
+        return result.all()
