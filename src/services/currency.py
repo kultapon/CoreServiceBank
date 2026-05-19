@@ -23,6 +23,9 @@ async def fetch_nbrb_usd_rate() -> dict:
 
 async def get_usd_rate():
     nbrb_data = await fetch_nbrb_usd_rate()
-    usd_rate = nbrb_data["Cur_OfficialRate"]
-
+    
+    try:
+        usd_rate = nbrb_data["Cur_OfficialRate"]
+    except Exception:
+        raise AppError("Something went wrong with NBRB API")
     return usd_rate
