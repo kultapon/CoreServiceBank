@@ -2,7 +2,7 @@ import structlog
 from fastapi import Depends
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
-from starlette import status
+from fastapi import status
 
 from src.dependencies import require_roles
 from src.database import SessionDep
@@ -10,7 +10,6 @@ from src.models import User
 from src.api.routers import categories_router
 from src.schemas.categories import CategoryFilter, CategoryRead, CategoryCreate
 from src.schemas.config import DBIntID
-from src.schemas.products import ProductCreate
 from src.schemas.roles import RoleEnum
 from src.services.categories_service import build_categories_query, create_category, update_category, delete_category
 
